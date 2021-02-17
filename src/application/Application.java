@@ -12,8 +12,8 @@ public class Application {
 	private static final int PORT_PROG = 4000;
 
 	public static void main(String[] args) throws IOException {
-		new Thread(new Serveur(PORT_PROG, ServiceProg.class)).start();
 		new Thread(new Serveur(PORT_AMA, ServiceAma.class)).start();
+		new Thread(new Serveur(PORT_PROG, ServiceProg.class)).start();
 	}
 }
 
