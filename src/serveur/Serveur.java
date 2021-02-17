@@ -19,7 +19,7 @@ public class Serveur implements Runnable {
 
 	public void run() {
 		try {
-			Constructor c = this.service.getConstructor(Socket.class);
+			Constructor<? extends Runnable> c = this.service.getConstructor(Socket.class);
 			while(true)
 				new Thread((Runnable) c.newInstance(this.listen_socket.accept())).start();
 				
