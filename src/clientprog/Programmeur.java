@@ -18,13 +18,9 @@ public class Programmeur {
 	public void setFtpUrl(String ftpUrl) {
 		this.ftpUrl = ftpUrl;
 	}
-
-	public String getLogin() {
-		return login;
-	}
-
-	public String getMotDePasse() {
-		return motDePasse;
+	
+	public boolean verifCredentials(String password) {
+		return this.motDePasse.equals(password);
 	}
 
 }

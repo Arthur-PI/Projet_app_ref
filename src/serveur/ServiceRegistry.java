@@ -9,11 +9,10 @@ import java.util.Vector;
 
 public class ServiceRegistry {
 	
-	
-
 	static {
 		servicesClasses = new Vector<Class<? extends Service>>();
 	}
+	
 	private static List<Class<? extends Service>> servicesClasses;
 
 	public static void addService(Class<? extends Service> runnableClass) throws ValidationException {
