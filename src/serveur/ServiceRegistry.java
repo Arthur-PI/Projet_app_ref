@@ -8,9 +8,8 @@ import java.util.List;
 import java.util.Vector;
 
 public class ServiceRegistry {
-	// cette classe est un registre de services
-	// partagée en concurrence par les clients et les "ajouteurs" de services,
-	// un Vector pour cette gestion est pratique
+	
+	
 
 	static {
 		servicesClasses = new Vector<Class<? extends Service>>();
@@ -18,14 +17,13 @@ public class ServiceRegistry {
 	private static List<Class<? extends Service>> servicesClasses;
 
 	public static void addService(Class<? extends Service> runnableClass) throws ValidationException {
-		// vérifier la conformité par introspection
-		// si non conforme --> exception
 		validation(runnableClass);
+		// TODO gerer les pb de concurrence
 		servicesClasses.add(runnableClass);
 	}
 
 	private static void validation(Class<? extends Service> classe) throws ValidationException {
-	
+		
 		Constructor<? extends Service> c = null;
 		try { 
 			c = classe.getConstructor(java.net.Socket.class); 
@@ -37,17 +35,18 @@ public class ServiceRegistry {
 			throw new ValidationException("Le constructeur (Socket) doit être public");
 		if (c.getExceptionTypes().length != 0)
 			throw new ValidationException("Le constructeur (Socket) ne doit pas lever d'exception");
-		// etc... avec tous les tests nécessaires
 		
+		// TODO finir les verifs
 	
 	}
 
 	public static Class<? extends Service> getServiceClass(int numService) {
-			return servicesClasses.get(numService-1);
+		// TODO gerer les pb de concurrence
+		return servicesClasses.get(numService-1);
 	}
 	
-// toStringue liste les activités présentes
 	public static String toStringue() {
+		// TODO gerer les pb de concurrence
 		String result = "Activités présentes :##";
 		int i = 1;
 		// foreach n'est qu'un raccourci d'écriture 
