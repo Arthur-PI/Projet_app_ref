@@ -20,7 +20,10 @@ public class ServiceProg implements Runnable{
 		try {
 			BufferedReader in = new BufferedReader (new InputStreamReader(this.client.getInputStream ( )));
 			PrintWriter out = new PrintWriter (this.client.getOutputStream ( ), true);
-			// TODO
+			// TODO Menu Inscription ou Connexion
+			// TODO Inscription: demander le serveur FTP, login, password, verfier si le login existe deja
+			// TODO Connexion: login, password
+			// TODO Une fois connecter: Menu pour ajouter une service ou pour changer le serveur FTP
 			
 		} catch (IOException e) {
 			e.printStackTrace();
