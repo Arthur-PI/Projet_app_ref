@@ -18,13 +18,13 @@ public class ClientProg {
 		try {
 			s = new Socket(HOST, PORT_SERVICE);
 			BufferedReader sin = new BufferedReader(new InputStreamReader(s.getInputStream()));
-			PrintWriter sout = new PrintWriter(s.getOutputStream());
+			PrintWriter sout = new PrintWriter(s.getOutputStream(), true);
 			sc = new Scanner(System.in);
 			String line = "";
 			
 			while (true) {
 				line = sin.readLine().replaceAll("##", "\n"); 
-				if (line.equals("FinService")) break;
+				if (line.equals("finService")) break;
 				
 				System.out.println(line);
 				
@@ -40,10 +40,6 @@ public class ClientProg {
 			s.close();
 			sc.close();
 		} catch(IOException | NullPointerException e){System.err.println(e.getMessage());}
-	}
-
-	public static void menuArrive(BufferedReader in, PrintWriter out) {
-
 	}
 
 }
