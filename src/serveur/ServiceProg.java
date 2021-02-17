@@ -23,29 +23,44 @@ public class ServiceProg implements Runnable {
 		this.client = s;
 	}
 
-	@SuppressWarnings("unused")
 	@Override
 	public void run() {
 		try {
 			this.sin = new BufferedReader(new InputStreamReader(this.client.getInputStream()));
 			this.sout = new PrintWriter(this.client.getOutputStream(), true);
 
-			switch (menuArrive()) {
-			case "1":
-				connexion();
-				break;
-			case "2":
-				inscription();
-				break;
-			default:
-				return;
-			}
-			// TODO Inscription: demander le serveur FTP, login, password, verfier si le
-			// login existe deja
-			// TODO Connexion: login, password
+			boolean continu = false;
+			do {
+				switch (menuArrive()) {
+				case "1":
+					continu = connexion();
+					break;
+				case "2":
+					continu = inscription();
+					break;
+				default: // == exit
+					sout.println("finService");
+					return;
+				}
+			} while (!continu);
+
+			// ici l'utilisateur est connecté
+
 			// TODO Une fois connecter: Menu pour ajouter une service ou pour changer le
 			// serveur FTP
-
+			while (true) {
+				switch (menuService()) {
+				case "charger":
+					chargerService();
+					break;
+				case "ftp":
+					modifFtpServeur();
+					break;
+				default: // == exit
+					sout.println("finService");
+					return;
+				}
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -62,19 +77,17 @@ public class ServiceProg implements Runnable {
 
 	public String menuArrive() {
 		String line = "";
-		String message = "Bienvenue sur le service de chargement de service."
-				+ "##Vous pouvez à tout moment entrer [exit] pour quitter le service"
-				+ "##Connexion(1) ou Inscription(2):";
-		
+		String message = "Bienvenue sur le service de chargement de service." + "##Connexion(1) ou Inscription(2):";
+
 		try {
 			do {
-				sout.print(message);
-				line = sin.readLine();
-				message = "Veuillez choisir 1 ou 2:";
+				sout.println(message);
+				line = sin.readLine().trim();
+				message = "Veuillez choisir 1 ou 2 :";
 			} while (!(line.equals("1") || line.equals("2") || line.equals("0")));
 
 			return line;
-			
+
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
 			return "";
@@ -88,11 +101,11 @@ public class ServiceProg implements Runnable {
 		String message = "";
 
 		try {
-			message = "Pour vous inscrire##Votre login:";
+			message = "Pour vous inscrire##Entrez votre identifiant : ";
 			do {
 				sout.println(message);
 				login = sin.readLine();
-				message = "Ce login est deja prit";
+				message = "Ce login est deja prit.##Merci d'en essayer un autre : ";
 				// TODO gérer la concurrence sur programmeurs
 			} while (!(login.equals("exit") || !programmeurs.containsKey(login)));
 
@@ -103,20 +116,21 @@ public class ServiceProg implements Runnable {
 			if (login.equals("exit"))
 				return false;
 
-			sout.println("Entrez votre mot de passe:");
+			sout.println("Entrez votre mot de passe : ");
 			password = sin.readLine();
 			if (password.equals("exit") || password.trim().isEmpty())
 				return false;
 
-			message = "Entrez l'URL de votre serveur FTP:";
+			message = "Entrez l'URL de votre serveur FTP : ";
 			do {
 				sout.println(message);
 				ftp = sin.readLine();
 				message = "Merci de rentrer une URL valide";
 			} while (!(ftp.startsWith("ftp://") || ftp.equals("exit")));
 
+			this.programmeur = new Programmeur(login, password, ftp);
 			synchronized (programmeurs) {
-				programmeurs.put(login, new Programmeur(login, password, ftp));
+				programmeurs.put(login, this.programmeur);
 			}
 			return true;
 
@@ -132,7 +146,7 @@ public class ServiceProg implements Runnable {
 		String message = "";
 
 		try {
-			message = "Pour vous connecter, merci d'entrer votre identifiant :";
+			message = "Pour vous connecter, merci d'entrer votre identifiant : ";
 			while (true) {
 				sout.println(message);
 				login = sin.readLine();
@@ -150,7 +164,7 @@ public class ServiceProg implements Runnable {
 					this.programmeur = p;
 					return true;
 				}
-				message = "identifiant et/ou mot de passe incorrect(s)";
+				message = "Identifiant et/ou mot de passe incorrect(s)##Merci de réessayer ; entrez votre identifiant : ";
 			}
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
@@ -158,15 +172,31 @@ public class ServiceProg implements Runnable {
 		}
 	}
 
-	public void menuService() {
-		// TODO
+	public String menuService() {
+		String line = "";
+		String message = "Connecté en tant que " + this.programmeur
+				+ "##Entrez [Charger](ou mettre à jour) un service ou [ftp] pour changer l'addresse de votre serveur ftp";
+
+		try {
+			do {
+				sout.println(message);
+				line = sin.readLine().trim().toLowerCase();
+				message = "Veuillez choisir [charger] ou [ftp] :";
+			} while (!(line.equals("charger") || line.equals("ftp") || line.equals("exit")));
+
+			return line;
+
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
+			return "";
+		}
 	}
 
 	public void modifFtpServeur() {
-		// TODO
+		// TODO modif le serveur ftp d'un programmeur
 	}
 
-	public void ajoutService() {
-		// TODO
+	public void chargerService() {
+		// TODO charge un service
 	}
 }
