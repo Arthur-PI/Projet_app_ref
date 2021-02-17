@@ -23,7 +23,8 @@ public class Programmeur {
 		return this.motDePasse.equals(password);
 	}
 
-	public String getLogin() {
+	@Override
+	public String toString() { 
 		return login;
 	}
 
