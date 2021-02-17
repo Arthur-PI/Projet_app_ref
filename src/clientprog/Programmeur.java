@@ -15,8 +15,12 @@ public class Programmeur {
 		return ftpUrl;
 	}
 
-	public void setFtpUrl(String ftpUrl) {
-		this.ftpUrl = ftpUrl;
+	public void setFtpUrl(String newftpUrl) {
+		this.ftpUrl = newftpUrl;
+	}
+	
+	public String getLogin() {
+		return this.login;
 	}
 	
 	public boolean verifCredentials(String password) {

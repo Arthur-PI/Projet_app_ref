@@ -2,6 +2,8 @@ package serveur;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
 
 import clientprog.Programmeur;
@@ -11,12 +13,12 @@ public class ServiceProg implements Runnable {
 	private Socket client;
 	private Programmeur programmeur;
 	private BufferedReader sin;
-	PrintWriter sout;
-
+	private PrintWriter sout;
+	
 	private static Map<String, Programmeur> programmeurs;
 
 	static {
-		programmeurs = new HashMap<>();
+		programmeurs =  Collections.synchronizedMap(new HashMap<>());
 	}
 
 	public ServiceProg(Socket s) {
@@ -44,22 +46,27 @@ public class ServiceProg implements Runnable {
 				}
 			} while (!continu);
 
-			// ici l'utilisateur est connecté
+			// ici l'utilisateur est connecte
 
 			// TODO Une fois connecter: Menu pour ajouter une service ou pour changer le
 			// serveur FTP
+			String message = "Connecte en tant que " + this.programmeur  + "##";
+			String action = "";
 			while (true) {
-				switch (menuService()) {
-				case "charger":
-					chargerService();
+				action = menuService(message);
+				message = "";
+				switch (action) {
+				case "1":
+					message = chargerService();
 					break;
-				case "ftp":
-					modifFtpServeur();
+				case "2":
+					message = modifFtpServeur();
 					break;
 				default: // == exit
 					sout.println("finService");
 					return;
 				}
+				
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -77,14 +84,17 @@ public class ServiceProg implements Runnable {
 
 	public String menuArrive() {
 		String line = "";
-		String message = "Bienvenue sur le service de chargement de service." + "##Connexion(1) ou Inscription(2):";
+		String message = "Bienvenue sur le service de chargement de service. Vous pourrez taper [exit] a tout moment pout quitter";
+		message += "####Quel methode d'authentification:";
+		message += "##1 == Connexion ==";
+		message += "##2 == Inscription ==";
 
 		try {
 			do {
 				sout.println(message);
 				line = sin.readLine().trim();
-				message = "Veuillez choisir 1 ou 2 :";
-			} while (!(line.equals("1") || line.equals("2") || line.equals("0")));
+				message = "Veuillez choisir [1] ou [2] :";
+			} while (!(line.equals("1") || line.equals("2") || line.equals("exit")));
 
 			return line;
 
@@ -101,17 +111,17 @@ public class ServiceProg implements Runnable {
 		String message = "";
 
 		try {
-			message = "Pour vous inscrire##Entrez votre identifiant : ";
+			message = "Entrez votre identifiant : ";
 			do {
 				sout.println(message);
 				login = sin.readLine();
-				message = "Ce login est deja prit.##Merci d'en essayer un autre : ";
-				// TODO gérer la concurrence sur programmeurs
+				message = "Ce login est deja prit, merci d'en essayer un autre : ";
 			} while (!(login.equals("exit") || !programmeurs.containsKey(login)));
 
-			synchronized (programmeurs) {
-				programmeurs.put(login, null);
-			}
+			/* J'ai supprime les synchnized parceque j'ai trouve d'autres
+			 * problemes de concurrence chiant donc j'ai passer la HahMap en synchnized
+			 * */  
+			programmeurs.put(login, null);
 
 			if (login.equals("exit"))
 				return false;
@@ -126,12 +136,10 @@ public class ServiceProg implements Runnable {
 				sout.println(message);
 				ftp = sin.readLine();
 				message = "Merci de rentrer une URL valide";
-			} while (!(ftp.startsWith("ftp://") || ftp.equals("exit")));
+			} while (!(ftp.startsWith("ftp://") || ftp.startsWith("ftps://") || ftp.equals("exit")));
 
 			this.programmeur = new Programmeur(login, password, ftp);
-			synchronized (programmeurs) {
-				programmeurs.put(login, this.programmeur);
-			}
+			programmeurs.put(login, this.programmeur);
 			return true;
 
 		} catch (IOException e) {
@@ -164,7 +172,7 @@ public class ServiceProg implements Runnable {
 					this.programmeur = p;
 					return true;
 				}
-				message = "Identifiant et/ou mot de passe incorrect(s)##Merci de réessayer ; entrez votre identifiant : ";
+				message = "Identifiant et/ou mot de passe incorrect(s)##Merci de reessayer, entrez votre identifiant : ";
 			}
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
@@ -172,17 +180,19 @@ public class ServiceProg implements Runnable {
 		}
 	}
 
-	public String menuService() {
+	public String menuService(String m) {
 		String line = "";
-		String message = "Connecté en tant que " + this.programmeur
-				+ "##Entrez [Charger](ou mettre à jour) un service ou [ftp] pour changer l'addresse de votre serveur ftp";
+		// TODO afficher les services ajouter par le Client
+		String message = m + "Que voulez-vous faire : ";
+		message += "##1 == Ajouter/Recharger un service de votre serveur FTP ==";
+		message += "##2 == Modifier l'URL de votre serveur FTP ==";
 
 		try {
 			do {
 				sout.println(message);
 				line = sin.readLine().trim().toLowerCase();
-				message = "Veuillez choisir [charger] ou [ftp] :";
-			} while (!(line.equals("charger") || line.equals("ftp") || line.equals("exit")));
+				message = "Veuillez choisir [1] ou [2] :";
+			} while (!(line.equals("1") || line.equals("2") || line.equals("exit")));
 
 			return line;
 
@@ -192,11 +202,51 @@ public class ServiceProg implements Runnable {
 		}
 	}
 
-	public void modifFtpServeur() {
-		// TODO modif le serveur ftp d'un programmeur
+	public String modifFtpServeur() {
+		String line = "";
+		String message = "Quel est l'url du nouveau serveur FTP (actuellement "+ programmeur.getFtpUrl() +" ) :";
+		try {
+			do {
+				sout.println(message);
+				line = sin.readLine();
+				message = "Rentrez une URL ftp valide :";
+			} while (!(line.startsWith("ftp://") || line.equals("exit")));
+		} catch (IOException e) {
+			return e.toString() + "##";
+		}
+		if (line.equals("exit")) return "";
+		
+		programmeur.setFtpUrl(line);
+		return "Serveur ftp modifier##";
 	}
 
-	public void chargerService() {
-		// TODO charge un service
+	public String chargerService() {
+		String line = "";
+		String message = "Donnez le nom de la Classe du service a charger :";
+		URLClassLoader urlcl = null;
+		
+		try {
+			sout.println(message);
+			line = sin.readLine();
+			message = "Donnez une Classe existante";
+			if (line.equals("exit")) return "";
+			//caca
+			
+			urlcl = URLClassLoader.newInstance(new URL[] {new URL(programmeur.getFtpUrl())});
+			try {
+				System.out.println(urlcl.getURLs()[0].toString() + programmeur.getLogin() + "." + line );
+				ServiceRegistry.addService(urlcl.loadClass(programmeur.getLogin() + "." + line));
+				return "Service ajoute avec succes####";
+			} catch (ClassNotFoundException e) {
+				return  "La classe est introuvable####";
+			} catch (ValidationException e) {
+				return e.getMessage() + "####";
+			}
+			
+			
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
+			return "";
+		}
 	}
 }

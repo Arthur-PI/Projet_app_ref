@@ -21,11 +21,11 @@ public class ServiceAma implements Runnable {
 			
 			out.println(ServiceRegistry.toStringue() + "Tapez le numero de service desire :");
 			int choix = Integer.parseInt(in.readLine());
-			Class<? extends Service> classe = ServiceRegistry.getServiceClass(choix);
+			Class<? extends IService> classe = ServiceRegistry.getServiceClass(choix);
 			
 			try {
-				Constructor<? extends Service> niou = classe.getConstructor(java.net.Socket.class);
-				Service service = niou.newInstance(this.client);
+				Constructor<? extends IService> niou = classe.getConstructor(java.net.Socket.class);
+				IService service = niou.newInstance(this.client);
 				service.run();
 				
 			} catch (SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException e) {

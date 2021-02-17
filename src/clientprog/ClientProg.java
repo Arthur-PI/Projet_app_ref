@@ -27,6 +27,7 @@ public class ClientProg {
 				if (line.equals("finService")) break;
 				
 				System.out.println(line);
+				System.out.print("> ");
 				
 				sout.println(sc.nextLine());
 			}

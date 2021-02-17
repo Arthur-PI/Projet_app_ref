@@ -12,21 +12,33 @@ import java.util.Vector;
 public class ServiceRegistry {
 
 	static {
-		servicesClasses = new Vector<Class<? extends Service>>();
+		servicesClasses = new Vector<Class<? extends IService>>();
 	}
 
-	private static List<Class<? extends Service>> servicesClasses;
+	private static List<Class<? extends IService>> servicesClasses;
 
-	public static void addService(Class<? extends Service> runnableClass) throws ValidationException {
+	@SuppressWarnings("unchecked")
+	public static void addService(Class<?> runnableClass) throws ValidationException {
 		validation(runnableClass);
-		// TODO gérer les pb de concurrence
-		servicesClasses.add(runnableClass);
+		// TODO gerer les pb de concurrence
+		servicesClasses.add((Class<? extends IService>) runnableClass);
 	}
 
-	private static void validation(Class<? extends Service> classe) throws ValidationException {
+	private static void validation(Class<?> classe) throws ValidationException {
+		
+		// Verif implemente l'interface Service
+		boolean found = false;
+		for (Class<?> i : classe.getInterfaces()) {
+			if (i == IService.class) {
+				found = true;
+				break;
+			}
+		}	
+		if (!found)
+			throw new ValidationException("N'implemente pas l'interface Service");
 
-		// Vérif du constructeur
-		Constructor<? extends Service> c = null;
+		// Verif du constructeur
+		Constructor<?> c = null;
 		try {
 			c = classe.getConstructor(java.net.Socket.class);
 		} catch (NoSuchMethodException e) {
@@ -38,19 +50,11 @@ public class ServiceRegistry {
 		if (c.getExceptionTypes().length != 0)
 			throw new ValidationException("Le constructeur (Socket) ne doit pas lever d'exception");
 
-		// Vérif implémente l'interface Service
-		boolean found = false;
-		for (Class<?> i : classe.getInterfaces())
-			if (i == Service.class)
-				found = true;
-		if (!found)
-			throw new ValidationException("N'implémente pas l'interface Service");
-
-		// Vérif n'est pas abstract
+		// Verif n'est pas abstract
 		if (Modifier.isAbstract(c.getModifiers()))
 			throw new ValidationException("Est abstract");
 
-		// Vérif a un attribut de type Socket private final
+		// Verif a un attribut de type Socket private final
 		found = false;
 		Field[] fields = classe.getDeclaredFields();
 		for (Field f : fields) {
@@ -61,7 +65,7 @@ public class ServiceRegistry {
 		if (!found)
 			throw new RuntimeException("Pas de Socket private final");
 
-		// Vérif a une méthode toStringue public static
+		// Verif a une methode toStringue public static
 		found = false;
 		Method[] methods = classe.getDeclaredMethods();
 		for (Method m : methods) {
@@ -71,22 +75,22 @@ public class ServiceRegistry {
 				found = true;
 		}
 		if (!found)
-			throw new ValidationException("Pas de méthode String toStringue public static");
+			throw new ValidationException("Pas de methode String toStringue public static");
 	}
 
-	public static Class<? extends Service> getServiceClass(int numService) {
-		// TODO gérer les pb de concurrence
+	public static Class<? extends IService> getServiceClass(int numService) {
+		// TODO gerer les pb de concurrence
 		return servicesClasses.get(numService - 1);
 	}
 
 	public static String toStringue() {
-		// TODO gérer les pb de concurrence
-		String result = "Activités présentes :##";
+		// TODO gerer les pb de concurrence
+		String result = "Activites presentes :##";
 		int i = 1;
-		// foreach n'est qu'un raccourci d'écriture
+		// foreach n'est qu'un raccourci d'ecriture
 		// donc il faut prendre le verrou explicitement sur la collection
 		synchronized (servicesClasses) {
-			for (Class<? extends Service> s : servicesClasses) {
+			for (Class<? extends IService> s : servicesClasses) {
 				try {
 					Method toStringue = s.getMethod("toStringue");
 					String string = (String) toStringue.invoke(s);
@@ -94,7 +98,7 @@ public class ServiceRegistry {
 					i++;
 				} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 						| InvocationTargetException e) {
-					e.printStackTrace(); // ??? - normalement déjà  testé par validation()
+					e.printStackTrace(); // ??? - normalement deja teste par validation()
 				}
 			}
 		}
