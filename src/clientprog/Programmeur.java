@@ -23,4 +23,8 @@ public class Programmeur {
 		return this.motDePasse.equals(password);
 	}
 
+	public String getLogin() {
+		return login;
+	}
+
 }
