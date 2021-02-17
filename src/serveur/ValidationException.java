@@ -1,4 +1,4 @@
-package server;
+package serveur;
 
 public class ValidationException extends Exception {
 

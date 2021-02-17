@@ -1,4 +1,4 @@
-package server;
+package serveur;
 
 public interface Service extends Runnable {
 }

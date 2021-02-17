@@ -1,5 +1,4 @@
-package server;
-
+package serveur;
 
 import java.io.*;
 import java.lang.reflect.Constructor;
@@ -7,18 +6,19 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.*;
 
 
-class ServiceBRi implements Runnable {
+public class ServiceAma implements Runnable {
 	
 	private Socket client;
 	
-	ServiceBRi(Socket socket) {
+	public ServiceAma(Socket socket) {
 		client = socket;
 	}
 
 	public void run() {
-		try {BufferedReader in = new BufferedReader (new InputStreamReader(client.getInputStream ( )));
+		try {
+			BufferedReader in = new BufferedReader (new InputStreamReader(client.getInputStream ( )));
 			PrintWriter out = new PrintWriter (client.getOutputStream ( ), true);
-			out.println(ServiceRegistry.toStringue()+"Tapez le numero de service desire :");
+			out.println(ServiceRegistry.toStringue() + "Tapez le numero de service desire :");
 			int choix = Integer.parseInt(in.readLine());
 			Class<? extends Service> classe = ServiceRegistry.getServiceClass(choix);
 			
@@ -42,10 +42,4 @@ class ServiceBRi implements Runnable {
 	protected void finalize() throws Throwable {
 		 client.close(); 
 	}
-
-	// lancement du service
-	public void start() {
-		(new Thread(this)).start();		
-	}
-
 }
