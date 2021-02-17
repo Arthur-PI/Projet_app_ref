@@ -20,24 +20,17 @@ public class Serveur implements Runnable {
 	public void run() {
 		try {
 			Constructor c = this.service.getConstructor(Socket.class);
-			while(true) {
+			while(true)
 				new Thread((Runnable) c.newInstance(this.listen_socket.accept())).start();
-			}
 				
 		}
 		catch (IOException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			try {this.listen_socket.close();} catch (IOException e1) {}
-			System.err.println("Pb sur le port d'écoute :"+e);
+			System.err.println("Pb sur le port d'écoute :" + e);
 		}
 	}
 
-	 // restituer les ressources --> finalize
 	protected void finalize() throws Throwable {
 		try {this.listen_socket.close();} catch (IOException e1) {}
-	}
-
-	// lancement du serveur
-	public void lancer() {
-		(new Thread(this)).start();		
 	}
 }
