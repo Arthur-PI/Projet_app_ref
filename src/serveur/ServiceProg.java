@@ -234,7 +234,7 @@ public class ServiceProg implements Runnable {
 				ServiceRegistry.addService(urlcl.loadClass(programmeur.getLogin() + "." + line));
 				return "Service ajoute avec succes####";
 			} catch (ClassNotFoundException e) {
-				return "La classe est introuvable####Vérifiez qu'elle se trouve dans un package à votre nom";
+				return "La classe est introuvable####Verifiez qu'elle se trouve dans un package a votre nom";
 			} catch (ValidationException e) {
 				return e.getMessage() + "####";
 			}
