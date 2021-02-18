@@ -15,16 +15,16 @@ public class ServiceAma implements Runnable {
 
 	public void run() {
 		try {
-			BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-			PrintWriter out = new PrintWriter(client.getOutputStream(), true);
+			BufferedReader sin = new BufferedReader(new InputStreamReader(client.getInputStream()));
+			PrintWriter sout = new PrintWriter(client.getOutputStream(), true);
 
-			out.println(ServiceRegistry.toStringue() + "Tapez le numero de service desire :");
-			int choix = Integer.parseInt(in.readLine());
+			sout.println(ServiceRegistry.toStringue() + "Tapez le numero de service desire :");
+			int choix = Integer.parseInt(sin.readLine());
 			Class<? extends IService> classe = ServiceRegistry.getServiceClass(choix);
 
 			try {
-				Constructor<? extends IService> niou = classe.getConstructor(java.net.Socket.class);
-				IService service = niou.newInstance(this.client);
+				Constructor<? extends IService> constructor = classe.getConstructor(java.net.Socket.class);
+				IService service = constructor.newInstance(this.client);
 				service.run();
 
 			} catch (SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException
