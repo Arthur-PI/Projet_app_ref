@@ -14,11 +14,11 @@ public class ServiceProg implements Runnable {
 	private Programmeur programmeur;
 	private BufferedReader sin;
 	private PrintWriter sout;
-	
+
 	private static Map<String, Programmeur> programmeurs;
 
 	static {
-		programmeurs =  Collections.synchronizedMap(new HashMap<>());
+		programmeurs = Collections.synchronizedMap(new HashMap<>());
 	}
 
 	public ServiceProg(Socket s) {
@@ -40,7 +40,7 @@ public class ServiceProg implements Runnable {
 				case "2":
 					continu = inscription();
 					break;
-				default: // == exit
+				default: // == "exit"
 					sout.println("finService");
 					return;
 				}
@@ -48,9 +48,7 @@ public class ServiceProg implements Runnable {
 
 			// ici l'utilisateur est connecte
 
-			// TODO Une fois connecter: Menu pour ajouter une service ou pour changer le
-			// serveur FTP
-			String message = "Connecte en tant que " + this.programmeur  + "##";
+			String message = "Connecte en tant que " + this.programmeur + "##";
 			String action = "";
 			while (true) {
 				action = menuService(message);
@@ -66,7 +64,7 @@ public class ServiceProg implements Runnable {
 					sout.println("finService");
 					return;
 				}
-				
+
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -115,12 +113,9 @@ public class ServiceProg implements Runnable {
 			do {
 				sout.println(message);
 				login = sin.readLine();
-				message = "Ce login est deja prit, merci d'en essayer un autre : ";
+				message = "Ce login est deja pris, merci d'en essayer un autre : ";
 			} while (!(login.equals("exit") || !programmeurs.containsKey(login)));
 
-			/* J'ai supprime les synchnized parceque j'ai trouve d'autres
-			 * problemes de concurrence chiant donc j'ai passer la HahMap en synchnized
-			 * */  
 			programmeurs.put(login, null);
 
 			if (login.equals("exit"))
@@ -128,6 +123,7 @@ public class ServiceProg implements Runnable {
 
 			sout.println("Entrez votre mot de passe : ");
 			password = sin.readLine();
+
 			if (password.equals("exit") || password.trim().isEmpty())
 				return false;
 
@@ -204,7 +200,7 @@ public class ServiceProg implements Runnable {
 
 	public String modifFtpServeur() {
 		String line = "";
-		String message = "Quel est l'url du nouveau serveur FTP (actuellement "+ programmeur.getFtpUrl() +" ) :";
+		String message = "Quel est l'url du nouveau serveur FTP (actuellement " + programmeur.getFtpUrl() + " ) :";
 		try {
 			do {
 				sout.println(message);
@@ -214,8 +210,9 @@ public class ServiceProg implements Runnable {
 		} catch (IOException e) {
 			return e.toString() + "##";
 		}
-		if (line.equals("exit")) return "";
-		
+		if (line.equals("exit"))
+			return "";
+
 		programmeur.setFtpUrl(line);
 		return "Serveur ftp modifier##";
 	}
@@ -224,26 +221,26 @@ public class ServiceProg implements Runnable {
 		String line = "";
 		String message = "Donnez le nom de la Classe du service a charger :";
 		URLClassLoader urlcl = null;
-		
+
 		try {
 			sout.println(message);
 			line = sin.readLine();
 			message = "Donnez une Classe existante";
-			if (line.equals("exit")) return "";
-			//caca
-			
-			urlcl = URLClassLoader.newInstance(new URL[] {new URL(programmeur.getFtpUrl())});
+			if (line.equals("exit"))
+				return "";
+			// caca
+
+			urlcl = URLClassLoader.newInstance(new URL[] { new URL(programmeur.getFtpUrl()) });
 			try {
-				System.out.println(urlcl.getURLs()[0].toString() + programmeur.getLogin() + "." + line );
+				System.out.println(urlcl.getURLs()[0].toString() + programmeur.getLogin() + "." + line);
 				ServiceRegistry.addService(urlcl.loadClass(programmeur.getLogin() + "." + line));
 				return "Service ajoute avec succes####";
 			} catch (ClassNotFoundException e) {
-				return  "La classe est introuvable####";
+				return "La classe est introuvable####";
 			} catch (ValidationException e) {
 				return e.getMessage() + "####";
 			}
-			
-			
+
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
 			return "";

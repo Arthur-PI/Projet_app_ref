@@ -5,40 +5,43 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.*;
 
-
 public class ServiceAma implements Runnable {
-	
+
 	private Socket client;
-	
+
 	public ServiceAma(Socket socket) {
 		client = socket;
 	}
 
 	public void run() {
 		try {
-			BufferedReader in = new BufferedReader (new InputStreamReader(client.getInputStream ( )));
-			PrintWriter out = new PrintWriter (client.getOutputStream ( ), true);
-			
+			BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+			PrintWriter out = new PrintWriter(client.getOutputStream(), true);
+
 			out.println(ServiceRegistry.toStringue() + "Tapez le numero de service desire :");
 			int choix = Integer.parseInt(in.readLine());
 			Class<? extends IService> classe = ServiceRegistry.getServiceClass(choix);
-			
+
 			try {
 				Constructor<? extends IService> niou = classe.getConstructor(java.net.Socket.class);
 				IService service = niou.newInstance(this.client);
 				service.run();
-				
-			} catch (SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException e) {
+
+			} catch (SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException | NoSuchMethodException e) {
 				System.out.println(e);
 			}
 		} catch (IOException e) {
-			//Fin du service
+			// Fin du service
 		}
 
-		try {client.close();} catch (IOException e2) {}
+		try {
+			client.close();
+		} catch (IOException e2) {
+		}
 	}
-	
+
 	protected void finalize() throws Throwable {
-		 client.close(); 
+		client.close();
 	}
 }

@@ -16,7 +16,8 @@ public class Serveur implements Runnable {
 	}
 
 	public void run() {
-		System.out.println("Lancement du service " + service.getName() + " sur le port " + listen_socket.getLocalPort());
+		System.out
+				.println("Lancement du service " + service.getName() + " sur le port " + listen_socket.getLocalPort());
 		try {
 			Constructor<? extends Runnable> c = this.service.getConstructor(Socket.class);
 			while (true)

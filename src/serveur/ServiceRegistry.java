@@ -10,12 +10,11 @@ import java.util.List;
 import java.util.Vector;
 
 public class ServiceRegistry {
+	private static List<Class<? extends IService>> servicesClasses;
 
 	static {
 		servicesClasses = new Vector<Class<? extends IService>>();
 	}
-
-	private static List<Class<? extends IService>> servicesClasses;
 
 	@SuppressWarnings("unchecked")
 	public static void addService(Class<?> runnableClass) throws ValidationException {
@@ -25,7 +24,7 @@ public class ServiceRegistry {
 	}
 
 	private static void validation(Class<?> classe) throws ValidationException {
-		
+
 		// Verif implemente l'interface Service
 		boolean found = false;
 		for (Class<?> i : classe.getInterfaces()) {
@@ -33,7 +32,7 @@ public class ServiceRegistry {
 				found = true;
 				break;
 			}
-		}	
+		}
 		if (!found)
 			throw new ValidationException("N'implemente pas l'interface Service");
 

@@ -14,33 +14,36 @@ public class ClientProg {
 	public static void main(String[] args) {
 		Socket s = null;
 		Scanner sc = null;
-		
+
 		try {
 			s = new Socket(HOST, PORT_SERVICE);
 			BufferedReader sin = new BufferedReader(new InputStreamReader(s.getInputStream()));
 			PrintWriter sout = new PrintWriter(s.getOutputStream(), true);
 			sc = new Scanner(System.in);
 			String line = "";
-			
+
 			while (true) {
-				line = sin.readLine().replaceAll("##", "\n"); 
-				if (line.equals("finService")) break;
-				
+				line = sin.readLine().replaceAll("##", "\n");
+				if (line.equals("finService"))
+					break;
+
 				System.out.println(line);
 				System.out.print("> ");
-				
+
 				sout.println(sc.nextLine());
 			}
 			System.out.println("Au revoir et merci");
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		try{
+
+		try {
 			s.close();
 			sc.close();
-		} catch(IOException | NullPointerException e){System.err.println(e.getMessage());}
+		} catch (IOException | NullPointerException e) {
+			System.err.println(e.getMessage());
+		}
 	}
 
 }
