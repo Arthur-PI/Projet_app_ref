@@ -1,4 +1,4 @@
-package clientprog;
+package serveur;
 
 public class Programmeur {
 	private String login;

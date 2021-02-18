@@ -6,8 +6,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
 
-import clientprog.Programmeur;
-
 public class ServiceProg implements Runnable {
 
 	private Socket client;
