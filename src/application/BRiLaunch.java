@@ -6,7 +6,7 @@ import serveur.Serveur;
 import serveur.ServiceProg;
 import serveur.ServiceAma;
 
-public class Application {
+public class BRiLaunch {
 	private static final int PORT_AMA = 3000;
 	private static final int PORT_PROG = 4000;
 
