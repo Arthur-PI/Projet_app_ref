@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.List;
 import java.util.Vector;
 
+// TODO test concurrences mais Vector == threadsafe
 public class ServiceRegistry {
 	private static List<Class<? extends IService>> servicesClasses;
 
@@ -19,7 +20,6 @@ public class ServiceRegistry {
 	@SuppressWarnings("unchecked")
 	public static void addService(Class<?> runnableClass) throws ValidationException {
 		validation(runnableClass);
-		// TODO gerer les pb de concurrence
 		servicesClasses.add((Class<? extends IService>) runnableClass);
 	}
 
@@ -78,27 +78,23 @@ public class ServiceRegistry {
 	}
 
 	public static Class<? extends IService> getServiceClass(int numService) {
-		// TODO gerer les pb de concurrence
 		return servicesClasses.get(numService - 1);
 	}
 
 	public static String toStringue() {
-		// TODO gerer les pb de concurrence
 		String result = "Activites presentes :##";
 		int i = 1;
 		// foreach n'est qu'un raccourci d'ecriture
 		// donc il faut prendre le verrou explicitement sur la collection
-		synchronized (servicesClasses) {
-			for (Class<? extends IService> s : servicesClasses) {
-				try {
-					Method toStringue = s.getMethod("toStringue");
-					String string = (String) toStringue.invoke(s);
-					result = result + i + " " + string + "##";
-					i++;
-				} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
-						| InvocationTargetException e) {
-					e.printStackTrace(); // ??? - normalement deja teste par validation()
-				}
+		for (Class<? extends IService> s : servicesClasses) {
+			try {
+				Method toStringue = s.getMethod("toStringue");
+				String string = (String) toStringue.invoke(s);
+				result = result + i + " " + string + "##";
+				i++;
+			} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException e) {
+				e.printStackTrace(); // ??? - normalement deja teste par validation()
 			}
 		}
 		return result;
