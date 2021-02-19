@@ -18,18 +18,21 @@ public class ServiceRegistry {
 	public static void addService(Class<?> runnableClass) throws ValidationException {
 		validation(runnableClass);
 		Class<? extends IService> tmpService = (Class<? extends IService>) runnableClass;
-		if (containService(tmpService)) {
-			servicesClasses.set(servicesClasses.indexOf(tmpService), tmpService);
+		int index = containService(tmpService);
+		if (index != -1) {
+			servicesClasses.set(index, tmpService);
 			return;
 		}
 		servicesClasses.add(tmpService);
 	}
 	
-	private static boolean containService(Class<? extends IService> service) {
-		for (Class<? extends IService> s : servicesClasses) {
-			if (s.getName().equals(service.getName())) return true;
+	// Cherche si le classe de service existe deja
+	// Renvoie l'index du service si trouve sinon -1
+	private static int containService(Class<? extends IService> service) {
+		for (int i=0; i<servicesClasses.size(); i++) {
+			if (servicesClasses.get(i).getName().equals(service.getName())) return i;
 		}
-		return false;
+		return -1;
 	}
 	
 
