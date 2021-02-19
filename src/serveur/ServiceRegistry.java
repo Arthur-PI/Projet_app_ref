@@ -5,32 +5,62 @@ import java.net.Socket;
 import java.util.*;
 
 import service.IService;
+import service.UnService;
 
 // TODO test concurrences mais Vector == threadsafe
+@SuppressWarnings("unchecked")
 public class ServiceRegistry {
-	private static List<Class<? extends IService>> servicesClasses;
+	private static List<UnService> servicesClasses;
 
 	static {
-		servicesClasses = new Vector<Class<? extends IService>>();
+		servicesClasses = new Vector<>();
 	}
 
-	@SuppressWarnings("unchecked")
-	public static void addService(Class<?> runnableClass) throws ValidationException {
+	
+	public static void addService(Class<?> runnableClass, String userLogin) throws ValidationException {
 		validation(runnableClass);
 		Class<? extends IService> tmpService = (Class<? extends IService>) runnableClass;
 		int index = containService(tmpService);
 		if (index != -1) {
-			servicesClasses.set(index, tmpService);
+			servicesClasses.get(index).setService(tmpService);
 			return;
 		}
-		servicesClasses.add(tmpService);
+		servicesClasses.add(new UnService(tmpService, userLogin));
+	}
+	
+	public static boolean deleteService(String index, String user) {
+		int i;
+		try {
+			i = Integer.parseInt(index) - 1;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+		if (i < servicesClasses.size() && i >= 0 && servicesClasses.get(i).getUser().equals(user)) {
+			servicesClasses.remove(i);
+			return true;
+		}
+		return false;
+	}
+	
+	public static boolean toggleService(String index, String user) {
+		int i;
+		try {
+			i = Integer.parseInt(index) - 1;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+		if (i < servicesClasses.size() && i >= 0 && servicesClasses.get(i).getUser().equals(user)) {
+			servicesClasses.get(i).toogleEnable();
+			return true;
+		}
+		return false;
 	}
 	
 	// Cherche si le classe de service existe deja
 	// Renvoie l'index du service si trouve sinon -1
 	private static int containService(Class<? extends IService> service) {
 		for (int i=0; i<servicesClasses.size(); i++) {
-			if (servicesClasses.get(i).getName().equals(service.getName())) return i;
+			if (servicesClasses.get(i).getService().getName().equals(service.getName())) return i;
 		}
 		return -1;
 	}
@@ -39,11 +69,10 @@ public class ServiceRegistry {
 	private static void validation(Class<?> classe) throws ValidationException {
 
 		// Verif implemente l'interface Service
-		System.out.println("caca et " + classe.getName());
 		boolean found = false;
 		for (Class<?> i : classe.getInterfaces()) {
-			System.out.println(i.getName() + " et " + IService.class.getName());
-			if (i.getName().equals(IService.class.getName())) {
+			System.out.println(i.getSimpleName() + " et " + IService.class.getSimpleName());
+			if (i.getSimpleName().equals(IService.class.getSimpleName())) {
 				found = true;
 				break;
 			}
@@ -93,7 +122,9 @@ public class ServiceRegistry {
 	}
 
 	public static Class<? extends IService> getServiceClass(int numService) {
-		return servicesClasses.get(numService - 1);
+		if (numService < 1 || numService > servicesClasses.size()) return null;
+		UnService tmpService = servicesClasses.get(numService - 1);
+		return tmpService.isEnable() ? tmpService.getService() : null;
 	}
 
 	public static String toStringue() {
@@ -101,15 +132,33 @@ public class ServiceRegistry {
 		int i = 1;
 		// foreach n'est qu'un raccourci d'ecriture
 		// donc il faut prendre le verrou explicitement sur la collection
-		for (Class<? extends IService> s : servicesClasses) {
+		for (UnService s : servicesClasses) {
+			if (!s.isEnable()) {
+				i++;
+				continue;
+			}
 			try {
-				Method toStringue = s.getMethod("toStringue");
+				Method toStringue = s.getService().getMethod("toStringue");
 				String string = (String) toStringue.invoke(s);
 				result = result + i + " " + string + "##";
 				i++;
 			} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException e) {
 				e.printStackTrace(); // ??? - normalement deja teste par validation()
+			}
+		}
+		return result;
+	}
+	
+	public static String toStringue(String user) {
+		String result = "Activites presentes :##";
+		int i = 1;
+		// foreach n'est qu'un raccourci d'ecriture
+		// donc il faut prendre le verrou explicitement sur la collection
+		for (UnService s : servicesClasses) {
+			if (s.getUser().equals(user)) {
+				result += i + "- " + s + "##";
+				i++;
 			}
 		}
 		return result;

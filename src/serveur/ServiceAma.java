@@ -20,14 +20,27 @@ public class ServiceAma implements Runnable {
 			BufferedReader sin = new BufferedReader(new InputStreamReader(client.getInputStream()));
 			PrintWriter sout = new PrintWriter(client.getOutputStream(), true);
 
-			sout.println(ServiceRegistry.toStringue() + "Tapez le numero de service desire :");
-			int choix = Integer.parseInt(sin.readLine());
-			Class<? extends IService> classe = ServiceRegistry.getServiceClass(choix);
+			String message = ServiceRegistry.toStringue() + "Tapez le numero de service desire :";
+			Class<? extends IService> classe = null;
+			String line = "";
+			do {
+				sout.println(message);
+				line = sin.readLine();
+				if (line.equals("exit")) {
+					sout.println("finService");
+					return;
+				}
+				int choix = Integer.parseInt(line);
+				classe = ServiceRegistry.getServiceClass(choix);
+				message = "Choisissez un service valide";
+			} while (classe == null);
+			
 
 			try {
 				Constructor<? extends IService> constructor = classe.getConstructor(java.net.Socket.class);
 				IService service = constructor.newInstance(this.client);
 				service.run();
+				sout.println("finService");
 
 			} catch (SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException e) {
@@ -36,6 +49,7 @@ public class ServiceAma implements Runnable {
 		} catch (IOException e) {
 			// Fin du service
 		}
+		
 
 		try {
 			client.close();

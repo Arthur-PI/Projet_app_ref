@@ -17,6 +17,7 @@ public class ServiceProg implements Runnable {
 
 	static {
 		programmeurs = Collections.synchronizedMap(new HashMap<>());
+		programmeurs.put("arthur", new Programmeur("arthur", "a", "ftp://localhost:21/"));
 	}
 
 	public ServiceProg(Socket s) {
@@ -56,6 +57,12 @@ public class ServiceProg implements Runnable {
 					message = chargerService();
 					break;
 				case "2":
+					message = deleteService();
+					break;
+				case "3":
+					message = toggleService();
+					break;
+				case "4":
 					message = modifFtpServeur();
 					break;
 				default: // == exit
@@ -179,14 +186,16 @@ public class ServiceProg implements Runnable {
 		// TODO afficher les services ajouter par le Client
 		String message = m + "Que voulez-vous faire : ";
 		message += "##1 == Ajouter/Recharger un service de votre serveur FTP ==";
-		message += "##2 == Modifier l'URL de votre serveur FTP ==";
+		message += "##2 == Supprimer un service deja charge ==";
+		message += "##3 == Activer/Desactiver un service deja charge ==";
+		message += "##4 == Modifier l'URL de votre serveur FTP ==";
 
 		try {
 			do {
 				sout.println(message);
 				line = sin.readLine().trim().toLowerCase();
-				message = "Veuillez choisir [1] ou [2] :";
-			} while (!(line.equals("1") || line.equals("2") || line.equals("exit")));
+				message = "Veuillez choisir [1], [2] ou [3] :";
+			} while (!(line.equals("1") || line.equals("2") || line.equals("3") || line.equals("exit")));
 
 			return line;
 
@@ -230,11 +239,12 @@ public class ServiceProg implements Runnable {
 				return "";
 			
 			// Initialise un nouveau URLClassLoader pour charger ou update les classe du serveur FTP
-			urlcl = new URLClassLoader(new URL[] { new URL(programmeur.getFtpUrl()) });
+			// ftp://localhost:21/arthur.jar
+			urlcl = new URLClassLoader(new URL[] { new URL(programmeur.getFtpUrl() + "arthur.jar" )  });
 			try {
 				// Ajoute la classe saisie pas l'utilisateur a la liste des services
-				System.out.println(programmeur.getLogin() + "." + line);
-				ServiceRegistry.addService(urlcl.loadClass(programmeur.getLogin() + "." + line));
+				System.out.println(urlcl.getURLs()[0] + "." + line);
+				ServiceRegistry.addService(urlcl.loadClass( programmeur.getLogin() + "." + "service." + line), programmeur.getLogin());
 				urlcl.close();
 				return "Service ajoute avec succes####";
 			} catch (ClassNotFoundException e) {
@@ -249,5 +259,45 @@ public class ServiceProg implements Runnable {
 			System.err.println(e.getMessage());
 			return "";
 		}
+	}
+	
+	public String deleteService() {
+		String line = "";
+		String message = "Quel Classe de voulez vous supprimer :";
+		message += ServiceRegistry.toStringue(programmeur.getLogin());
+		try {
+			do {
+				sout.println(message);
+				line = sin.readLine();
+				message = "Choisissez un numero valide !";
+			} while (!(line.equals("exit") || ServiceRegistry.deleteService(line, programmeur.getLogin())));
+		} catch (IOException e) {
+			return e.toString() + "##";
+		}
+		if (line.equals("exit"))
+			return "";
+		
+		return "Success##";
+		
+	}
+	
+	public String toggleService() {
+		String line = "";
+		String message = "Quel Classe de voulez vous activer/desactiver :";
+		message += ServiceRegistry.toStringue(programmeur.getLogin());
+		try {
+			do {
+				sout.println(message);
+				line = sin.readLine();
+				message = "Choisissez un numero valide !";
+			} while (!(line.equals("exit") || ServiceRegistry.toggleService(line, programmeur.getLogin())));
+		} catch (IOException e) {
+			return e.toString() + "##";
+		}
+		if (line.equals("exit"))
+			return "";
+		
+		return "Success##";
+		
 	}
 }

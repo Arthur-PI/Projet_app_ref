@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class ClientAma {
 	private final static int PORT_SERVICE = 3000;
@@ -17,23 +18,22 @@ public class ClientAma {
 
 			BufferedReader sin = new BufferedReader (new InputStreamReader(s.getInputStream ( )));
 			PrintWriter sout = new PrintWriter (s.getOutputStream ( ), true);
-			BufferedReader clavier = new BufferedReader(new InputStreamReader(System.in));			
+			Scanner clavier = new Scanner(System.in);			
 		
 			System.out.println("Connecté au serveur " + s.getInetAddress() + ":" + s.getPort());
 			
 			String line;
-			// menu et choix du service
-			line = sin.readLine().replaceAll("##", "\n");
-			System.out.println(line);
-			// saisie/envoie du choix
-			sout.println(clavier.readLine());
-			
-			// réception/affichage de la question
-			System.out.println(sin.readLine());
-			// saisie clavier/envoie au service de la réponse
-			sout.println(clavier.readLine());
-			// réception/affichage de la réponse
-			System.out.println(sin.readLine());
+			while (true) {
+				line = sin.readLine().replaceAll("##", "\n");
+				if (line.equals("finService"))
+					break;
+
+				System.out.println(line);
+				System.out.print("> ");
+
+				sout.println(clavier.nextLine());
+			}
+			System.out.println("Au revoir et merci");
 				
 			
 		}
