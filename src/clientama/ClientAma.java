@@ -23,8 +23,8 @@ public class ClientAma {
 			
 			String line;
 			// menu et choix du service
-			line = sin.readLine();
-			System.out.println(line.replaceAll("##", "\n"));
+			line = sin.readLine().replaceAll("##", "\n");
+			System.out.println(line);
 			// saisie/envoie du choix
 			sout.println(clavier.readLine());
 			

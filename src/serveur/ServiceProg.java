@@ -62,7 +62,7 @@ public class ServiceProg implements Runnable {
 					sout.println("finService");
 					return;
 				}
-
+				System.out.println(ServiceRegistry.toStringue());
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -216,6 +216,8 @@ public class ServiceProg implements Runnable {
 	}
 
 	public String chargerService() {
+		// Charge une classe sur le server FTP du client
+		// Charge la classe a la racine du serveur FTP dans un package avec le nom du client
 		String line = "";
 		String message = "Donnez le nom de la Classe du service a charger :";
 		URLClassLoader urlcl = null;
@@ -226,16 +228,20 @@ public class ServiceProg implements Runnable {
 			message = "Donnez une Classe existante";
 			if (line.equals("exit"))
 				return "";
-			// caca
-
-			urlcl = URLClassLoader.newInstance(new URL[] { new URL(programmeur.getFtpUrl()) });
+			
+			// Initialise un nouveau URLClassLoader pour charger ou update les classe du serveur FTP
+			urlcl = new URLClassLoader(new URL[] { new URL(programmeur.getFtpUrl()) });
 			try {
-				System.out.println(urlcl.getURLs()[0].toString() + programmeur.getLogin() + "." + line);
+				// Ajoute la classe saisie pas l'utilisateur a la liste des services
+				System.out.println(programmeur.getLogin() + "." + line);
 				ServiceRegistry.addService(urlcl.loadClass(programmeur.getLogin() + "." + line));
+				urlcl.close();
 				return "Service ajoute avec succes####";
 			} catch (ClassNotFoundException e) {
+				urlcl.close();
 				return "La classe est introuvable##Verifiez qu'elle se trouve dans un package a votre nom####";
 			} catch (ValidationException e) {
+				urlcl.close();
 				return e.getMessage() + "####";
 			}
 

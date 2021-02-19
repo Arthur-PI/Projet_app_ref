@@ -5,6 +5,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.*;
 
+import service.IService;
+
 public class ServiceAma implements Runnable {
 
 	private Socket client;

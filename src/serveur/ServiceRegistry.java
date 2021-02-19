@@ -1,13 +1,10 @@
 package serveur;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.net.Socket;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
+
+import service.IService;
 
 // TODO test concurrences mais Vector == threadsafe
 public class ServiceRegistry {
@@ -20,15 +17,30 @@ public class ServiceRegistry {
 	@SuppressWarnings("unchecked")
 	public static void addService(Class<?> runnableClass) throws ValidationException {
 		validation(runnableClass);
-		servicesClasses.add((Class<? extends IService>) runnableClass);
+		Class<? extends IService> tmpService = (Class<? extends IService>) runnableClass;
+		if (containService(tmpService)) {
+			servicesClasses.set(servicesClasses.indexOf(tmpService), tmpService);
+			return;
+		}
+		servicesClasses.add(tmpService);
 	}
+	
+	private static boolean containService(Class<? extends IService> service) {
+		for (Class<? extends IService> s : servicesClasses) {
+			if (s.getName().equals(service.getName())) return true;
+		}
+		return false;
+	}
+	
 
 	private static void validation(Class<?> classe) throws ValidationException {
 
 		// Verif implemente l'interface Service
+		System.out.println("caca et " + classe.getName());
 		boolean found = false;
 		for (Class<?> i : classe.getInterfaces()) {
-			if (i == IService.class) {
+			System.out.println(i.getName() + " et " + IService.class.getName());
+			if (i.getName().equals(IService.class.getName())) {
 				found = true;
 				break;
 			}
