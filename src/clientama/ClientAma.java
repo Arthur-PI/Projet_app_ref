@@ -30,8 +30,10 @@ public class ClientAma {
 
 				System.out.println(line);
 				System.out.print("> ");
+				String reponse = clavier.nextLine();
+				if (reponse == null) reponse = "";
 
-				sout.println(clavier.nextLine());
+				sout.println(reponse);
 			}
 			System.out.println("Au revoir et merci");
 				

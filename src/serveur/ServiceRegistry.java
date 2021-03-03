@@ -21,6 +21,7 @@ public class ServiceRegistry {
 		validation(runnableClass);
 		Class<? extends IService> tmpService = (Class<? extends IService>) runnableClass;
 		int index = containService(tmpService);
+		
 		if (index != -1) {
 			servicesClasses.get(index).setService(tmpService);
 			return;
@@ -71,7 +72,6 @@ public class ServiceRegistry {
 		// Verif implemente l'interface Service
 		boolean found = false;
 		for (Class<?> i : classe.getInterfaces()) {
-			System.out.println(i.getSimpleName() + " et " + IService.class.getSimpleName());
 			if (i.getSimpleName().equals(IService.class.getSimpleName())) {
 				found = true;
 				break;
