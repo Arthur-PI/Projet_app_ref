@@ -34,7 +34,6 @@ public class ServiceAma implements Runnable {
 				classe = ServiceRegistry.getServiceClass(choix);
 				message = "Choisissez un service valide";
 			} while (classe == null);
-			
 
 			try {
 				Constructor<? extends IService> constructor = classe.getConstructor(java.net.Socket.class);
@@ -49,7 +48,6 @@ public class ServiceAma implements Runnable {
 		} catch (IOException e) {
 			// Fin du service
 		}
-		
 
 		try {
 			client.close();
