@@ -240,7 +240,7 @@ public class ServiceProg implements Runnable {
 			return "";
 
 		programmeur.setFtpUrl(line);
-		return "Serveur ftp modifier##";
+		return "Serveur ftp modifie##";
 	}
 
 	public String chargerService(Boolean jar) throws ChargerServiceException {
@@ -268,6 +268,8 @@ public class ServiceProg implements Runnable {
 						programmeur.getLogin());
 				urlcl.close();
 				return "Service ajoute avec succes####";
+			}catch (NoClassDefFoundError e) {
+				throw new ChargerServiceException(e.getMessage() + "####");
 			} catch (ClassNotFoundException e) {
 				urlcl.close();
 				throw new ChargerServiceException(
