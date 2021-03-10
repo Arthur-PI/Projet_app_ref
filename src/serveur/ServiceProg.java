@@ -13,7 +13,7 @@ import java.util.jar.JarFile;
 public class ServiceProg implements Runnable {
 
 	private Socket client;
-	private Programmeur programmeur;
+	private Programmeur currentProgrammeur;
 	private BufferedReader sin;
 	private PrintWriter sout;
 	private static String EXIT = "exit";
@@ -24,7 +24,7 @@ public class ServiceProg implements Runnable {
 	static {
 		programmeurs = Collections.synchronizedMap(new HashMap<>());
 		programmeurs.put("arthur", new Programmeur("arthur", "a", "ftp://localhost:21/"));
-		programmeurs.put("arthur", new Programmeur("raphael", "r", "ftp://localhost:2121/"));
+		programmeurs.put("raphael", new Programmeur("raphael", "r", "ftp://localhost:2121/"));
 	}
 
 	public ServiceProg(Socket s) {
@@ -52,7 +52,7 @@ public class ServiceProg implements Runnable {
 				}
 			} while (!continu);
 
-			String message = "Connecte en tant que " + this.programmeur + "##";
+			String message = "Connecte en tant que " + this.currentProgrammeur + "##";
 			String action = "";
 			while (true) {
 				action = menuService(message);
@@ -140,6 +140,8 @@ public class ServiceProg implements Runnable {
 					throw new IOException(EXIT);
 			} while (programmeurs.containsKey(login));
 
+			programmeurs.put(login, null);
+
 			sout.println("Entrez votre mot de passe : ");
 			password = sin.readLine();
 
@@ -155,8 +157,8 @@ public class ServiceProg implements Runnable {
 					throw new IOException(EXIT);
 			} while (!(ftp.startsWith("ftp://") || ftp.startsWith("ftps://")));
 
-			this.programmeur = new Programmeur(login, password, ftp);
-			programmeurs.put(login, this.programmeur);
+			this.currentProgrammeur = new Programmeur(login, password, ftp);
+			programmeurs.remove(login);
 			return true;
 
 		} catch (IOException e) {
@@ -187,7 +189,7 @@ public class ServiceProg implements Runnable {
 					p = programmeurs.get(login);
 				}
 				if (p != null && p.verifCredentials(password)) {
-					this.programmeur = p;
+					this.currentProgrammeur = p;
 					return true;
 				}
 				message = "Identifiant et/ou mot de passe incorrect(s)##Merci de reessayer, entrez votre identifiant : ";
@@ -224,7 +226,7 @@ public class ServiceProg implements Runnable {
 
 	public String modifFtpServeur() {
 		String line = "";
-		String message = "Quel est l'url du nouveau serveur FTP (actuellement " + programmeur.getFtpUrl() + " ) :";
+		String message = "Quel est l'url du nouveau serveur FTP (actuellement " + currentProgrammeur.getFtpUrl() + " ) :";
 		try {
 			do {
 				sout.println(message);
@@ -237,7 +239,7 @@ public class ServiceProg implements Runnable {
 		if (line.equals(EXIT))
 			return "";
 
-		programmeur.setFtpUrl(line);
+		currentProgrammeur.setFtpUrl(line);
 		return "Serveur ftp modifie##";
 	}
 
@@ -252,11 +254,11 @@ public class ServiceProg implements Runnable {
 			if (line.equals(EXIT))
 				throw new ChargerServiceException("");
 
-			String jarFile = jar ? programmeur.getLogin() + ".jar" : "";
-			urlcl = new URLClassLoader(new URL[] { new URL(programmeur.getFtpUrl() + jarFile) });
+			String jarFile = jar ? currentProgrammeur.getLogin() + ".jar" : "";
+			urlcl = new URLClassLoader(new URL[] { new URL(currentProgrammeur.getFtpUrl() + jarFile) });
 			try {
-				ServiceRegistry.addService(urlcl.loadClass(programmeur.getLogin() + "." + line),
-						programmeur.getLogin());
+				ServiceRegistry.addService(urlcl.loadClass(currentProgrammeur.getLogin() + "." + line),
+						currentProgrammeur.getLogin());
 				urlcl.close();
 				return "Service ajoute avec succes####";
 			} catch (NoClassDefFoundError e) {
@@ -282,7 +284,7 @@ public class ServiceProg implements Runnable {
 		this.chargerService(true);
 
 		try {
-			String path = this.programmeur.getFtpUrl() + this.programmeur.getLogin() + ".jar";
+			String path = this.currentProgrammeur.getFtpUrl() + this.currentProgrammeur.getLogin() + ".jar";
 			JarFile jarFile = new JarFile(new File(new URI(path)));
 			Enumeration<JarEntry> entries = jarFile.entries();
 
@@ -312,13 +314,13 @@ public class ServiceProg implements Runnable {
 	public String deleteService() {
 		String line = "";
 		String message = "Quel Classe de voulez vous supprimer :";
-		message += ServiceRegistry.toStringue(programmeur.getLogin());
+		message += ServiceRegistry.toStringue(currentProgrammeur.getLogin());
 		try {
 			do {
 				sout.println(message);
 				line = sin.readLine();
 				message = "Choisissez un numero valide !";
-			} while (!(line.equals(EXIT) || ServiceRegistry.deleteService(line, programmeur.getLogin())));
+			} while (!(line.equals(EXIT) || ServiceRegistry.deleteService(line, currentProgrammeur.getLogin())));
 		} catch (IOException e) {
 			return e.toString() + "##";
 		}
@@ -332,13 +334,13 @@ public class ServiceProg implements Runnable {
 	public String toggleService() {
 		String line = "";
 		String message = "Quel Classe de service voulez vous activer/desactiver :";
-		message += ServiceRegistry.toStringue(programmeur.getLogin());
+		message += ServiceRegistry.toStringue(currentProgrammeur.getLogin());
 		try {
 			do {
 				sout.println(message);
 				line = sin.readLine();
 				message = "Choisissez un numero valide !";
-			} while (!(line.equals(EXIT) || ServiceRegistry.toggleService(line, programmeur.getLogin())));
+			} while (!(line.equals(EXIT) || ServiceRegistry.toggleService(line, currentProgrammeur.getLogin())));
 		} catch (IOException e) {
 			return e.toString() + "##";
 		}

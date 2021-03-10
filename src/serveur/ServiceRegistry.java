@@ -7,7 +7,6 @@ import java.util.*;
 import service.IService;
 import service.UnService;
 
-// TODO test concurrences mais Vector == threadsafe
 @SuppressWarnings("unchecked")
 public class ServiceRegistry {
 	private static List<UnService> servicesClasses;
@@ -59,9 +58,11 @@ public class ServiceRegistry {
 	// Cherche si le classe de service existe deja
 	// Renvoie l'index du service si trouve sinon -1
 	private static int containService(Class<? extends IService> service) {
-		for (int i = 0; i < servicesClasses.size(); i++) {
-			if (servicesClasses.get(i).getService().getName().equals(service.getName()))
-				return i;
+		synchronized (servicesClasses) {
+			for (int i = 0; i < servicesClasses.size(); i++) {
+				if (servicesClasses.get(i).getService().getName().equals(service.getName()))
+					return i;
+			}
 		}
 		return -1;
 	}
