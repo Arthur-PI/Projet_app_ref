@@ -226,7 +226,8 @@ public class ServiceProg implements Runnable {
 
 	public String modifFtpServeur() {
 		String line = "";
-		String message = "Quel est l'url du nouveau serveur FTP (actuellement " + currentProgrammeur.getFtpUrl() + " ) :";
+		String message = "Quel est l'url du nouveau serveur FTP (actuellement " + currentProgrammeur.getFtpUrl()
+				+ " ) :";
 		try {
 			do {
 				sout.println(message);
