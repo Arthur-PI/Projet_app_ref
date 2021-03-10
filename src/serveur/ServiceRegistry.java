@@ -27,6 +27,59 @@ public class ServiceRegistry {
 		servicesClasses.add(new UnService(tmpService, userLogin));
 	}
 
+	private static void validation(Class<?> classe) throws ValidationException {
+		// Verif implemente l'interface Service
+		boolean found = false;
+		for (Class<?> i : classe.getInterfaces()) {
+			if (i.getSimpleName().equals(IService.class.getSimpleName())) {
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+			throw new ValidationException("N'implemente pas l'interface Service");
+
+		// Verif du constructeur
+		Constructor<?> c = null;
+		try {
+			c = classe.getConstructor(java.net.Socket.class);
+		} catch (NoSuchMethodException e) {
+			throw new ValidationException("Il faut un constructeur avec Socket");
+		}
+		int modifiers = c.getModifiers();
+		if (!Modifier.isPublic(modifiers))
+			throw new ValidationException("Le constructeur (Socket) doit etre public");
+		if (c.getExceptionTypes().length != 0)
+			throw new ValidationException("Le constructeur (Socket) ne doit pas lever d'exception");
+
+		// Verif n'est pas abstract
+		if (Modifier.isAbstract(c.getModifiers()))
+			throw new ValidationException("Est abstract");
+
+		// Verif a un attribut de type Socket private final
+		found = false;
+		Field[] fields = classe.getDeclaredFields();
+		for (Field f : fields) {
+			int m = f.getModifiers();
+			if (Modifier.isFinal(m) && Modifier.isPrivate(m) && f.getType() == Socket.class)
+				found = true;
+		}
+		if (!found)
+			throw new RuntimeException("Pas de Socket private final");
+
+		// Verif a une methode toStringue public static
+		found = false;
+		Method[] methods = classe.getDeclaredMethods();
+		for (Method m : methods) {
+			int mo = m.getModifiers();
+			if (Modifier.isStatic(mo) && Modifier.isPublic(mo) && m.getReturnType() == String.class
+					&& m.getName().equals("toStringue"))
+				found = true;
+		}
+		if (!found)
+			throw new ValidationException("Pas de methode String toStringue public static");
+	}
+
 	public static boolean deleteService(String index, String user) {
 		int i;
 		try {
@@ -65,59 +118,6 @@ public class ServiceRegistry {
 			}
 		}
 		return -1;
-	}
-
-	private static void validation(Class<?> classe) throws ValidationException {
-		// Verif implemente l'interface Service
-		boolean found = false;
-		for (Class<?> i : classe.getInterfaces()) {
-			if (i.getSimpleName().equals(IService.class.getSimpleName())) {
-				found = true;
-				break;
-			}
-		}
-		if (!found)
-			throw new ValidationException("N'implemente pas l'interface Service");
-
-		// Verif du constructeur
-		Constructor<?> c = null;
-		try {
-			c = classe.getConstructor(java.net.Socket.class);
-		} catch (NoSuchMethodException e) {
-			throw new ValidationException("Il faut un constructeur avec Socket");
-		}
-		int modifiers = c.getModifiers();
-		if (!Modifier.isPublic(modifiers))
-			throw new ValidationException("Le constructeur (Socket) doit être public");
-		if (c.getExceptionTypes().length != 0)
-			throw new ValidationException("Le constructeur (Socket) ne doit pas lever d'exception");
-
-		// Verif n'est pas abstract
-		if (Modifier.isAbstract(c.getModifiers()))
-			throw new ValidationException("Est abstract");
-
-		// Verif a un attribut de type Socket private final
-		found = false;
-		Field[] fields = classe.getDeclaredFields();
-		for (Field f : fields) {
-			int m = f.getModifiers();
-			if (Modifier.isFinal(m) && Modifier.isPrivate(m) && f.getType() == Socket.class)
-				found = true;
-		}
-		if (!found)
-			throw new RuntimeException("Pas de Socket private final");
-
-		// Verif a une methode toStringue public static
-		found = false;
-		Method[] methods = classe.getDeclaredMethods();
-		for (Method m : methods) {
-			int mo = m.getModifiers();
-			if (Modifier.isStatic(mo) && Modifier.isPublic(mo) && m.getReturnType() == String.class
-					&& m.getName().equals("toStringue"))
-				found = true;
-		}
-		if (!found)
-			throw new ValidationException("Pas de methode String toStringue public static");
 	}
 
 	public static Class<? extends IService> getServiceClass(int numService) {
