@@ -9,19 +9,19 @@ import java.util.Scanner;
 
 public class ClientAma {
 	private final static int PORT_SERVICE = 3000;
-	private final static String HOST = "localhost"; 
-	
+	private final static String HOST = "localhost";
+
 	public static void main(String[] args) {
-		Socket s = null;		
+		Socket s = null;
 		try {
 			s = new Socket(HOST, PORT_SERVICE);
 
-			BufferedReader sin = new BufferedReader (new InputStreamReader(s.getInputStream ( )));
-			PrintWriter sout = new PrintWriter (s.getOutputStream ( ), true);
-			Scanner clavier = new Scanner(System.in);			
-		
-			System.out.println("Connecté au serveur " + s.getInetAddress() + ":" + s.getPort());
-			
+			BufferedReader sin = new BufferedReader(new InputStreamReader(s.getInputStream()));
+			PrintWriter sout = new PrintWriter(s.getOutputStream(), true);
+			Scanner clavier = new Scanner(System.in);
+
+			System.out.println("Connecte au serveur " + s.getInetAddress() + ":" + s.getPort());
+
 			String line;
 			while (true) {
 				line = sin.readLine().replaceAll("##", "\n");
@@ -31,16 +31,22 @@ public class ClientAma {
 				System.out.println(line);
 				System.out.print("> ");
 				String reponse = clavier.nextLine();
-				if (reponse == null) reponse = "";
+				if (reponse == null)
+					reponse = "";
 
 				sout.println(reponse);
 			}
 			System.out.println("Au revoir et merci");
-				
-			
+			clavier.close();
+
+		} catch (IOException e) {
+			System.err.println("Fin de la connexion");
 		}
-		catch (IOException e) { System.err.println("Fin de la connexion"); }
-		try { if (s != null) s.close(); } 
-		catch (IOException e2) { ; }		
+		try {
+			if (s != null)
+				s.close();
+		} catch (IOException e2) {
+			;
+		}
 	}
 }

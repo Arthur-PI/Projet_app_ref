@@ -16,19 +16,18 @@ public class ServiceRegistry {
 		servicesClasses = new Vector<>();
 	}
 
-	
 	public static void addService(Class<?> runnableClass, String userLogin) throws ValidationException {
 		validation(runnableClass);
 		Class<? extends IService> tmpService = (Class<? extends IService>) runnableClass;
 		int index = containService(tmpService);
-		
+
 		if (index != -1) {
 			servicesClasses.get(index).setService(tmpService);
 			return;
 		}
 		servicesClasses.add(new UnService(tmpService, userLogin));
 	}
-	
+
 	public static boolean deleteService(String index, String user) {
 		int i;
 		try {
@@ -42,7 +41,7 @@ public class ServiceRegistry {
 		}
 		return false;
 	}
-	
+
 	public static boolean toggleService(String index, String user) {
 		int i;
 		try {
@@ -56,19 +55,18 @@ public class ServiceRegistry {
 		}
 		return false;
 	}
-	
+
 	// Cherche si le classe de service existe deja
 	// Renvoie l'index du service si trouve sinon -1
 	private static int containService(Class<? extends IService> service) {
-		for (int i=0; i<servicesClasses.size(); i++) {
-			if (servicesClasses.get(i).getService().getName().equals(service.getName())) return i;
+		for (int i = 0; i < servicesClasses.size(); i++) {
+			if (servicesClasses.get(i).getService().getName().equals(service.getName()))
+				return i;
 		}
 		return -1;
 	}
-	
 
 	private static void validation(Class<?> classe) throws ValidationException {
-
 		// Verif implemente l'interface Service
 		boolean found = false;
 		for (Class<?> i : classe.getInterfaces()) {
@@ -122,7 +120,8 @@ public class ServiceRegistry {
 	}
 
 	public static Class<? extends IService> getServiceClass(int numService) {
-		if (numService < 1 || numService > servicesClasses.size()) return null;
+		if (numService < 1 || numService > servicesClasses.size())
+			return null;
 		UnService tmpService = servicesClasses.get(numService - 1);
 		return tmpService.isEnable() ? tmpService.getService() : null;
 	}
@@ -149,7 +148,7 @@ public class ServiceRegistry {
 		}
 		return result;
 	}
-	
+
 	public static String toStringue(String user) {
 		String result = "Activites presentes :##";
 		int i = 1;
