@@ -314,7 +314,7 @@ public class ServiceProg implements Runnable {
 
 	public String deleteService() {
 		String line = "";
-		String message = "Quel Classe de voulez vous supprimer :";
+		String message = "Quelle Classe de service voulez vous supprimer :";
 		message += ServiceRegistry.toStringue(currentProgrammeur.getLogin());
 		try {
 			do {
@@ -334,7 +334,7 @@ public class ServiceProg implements Runnable {
 
 	public String toggleService() {
 		String line = "";
-		String message = "Quel Classe de service voulez vous activer/desactiver :";
+		String message = "Quelle Classe de service voulez vous activer/desactiver :";
 		message += ServiceRegistry.toStringue(currentProgrammeur.getLogin());
 		try {
 			do {
