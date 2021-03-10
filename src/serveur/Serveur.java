@@ -28,7 +28,7 @@ public class Serveur implements Runnable {
 				this.listen_socket.close();
 			} catch (IOException e1) {
 			}
-			System.err.println("Pb sur le port d'�coute :" + e);
+			System.err.println("Pb sur le port d'ecoute :" + e);
 		}
 	}
 

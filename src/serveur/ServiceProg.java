@@ -24,6 +24,7 @@ public class ServiceProg implements Runnable {
 	static {
 		programmeurs = Collections.synchronizedMap(new HashMap<>());
 		programmeurs.put("arthur", new Programmeur("arthur", "a", "ftp://localhost:21/"));
+		programmeurs.put("arthur", new Programmeur("raphael", "r", "ftp://localhost:2121/"));
 	}
 
 	public ServiceProg(Socket s) {
@@ -45,13 +46,11 @@ public class ServiceProg implements Runnable {
 				case "2":
 					continu = inscription();
 					break;
-				default: // == "exit"
+				default:
 					sout.println("finService");
 					return;
 				}
 			} while (!continu);
-
-			// ici l'utilisateur est connecte
 
 			String message = "Connecte en tant que " + this.programmeur + "##";
 			String action = "";
@@ -68,9 +67,9 @@ public class ServiceProg implements Runnable {
 					break;
 				case "2":
 					message = "Service Indisponible##";
-//					try {
-//						message = chargerServiceJar();
-//					} catch (ChargerServiceException e) { message = e.getMessage(); }
+					// try {
+					// message = chargerServiceJar();
+					// } catch (ChargerServiceException e) { message = e.getMessage(); }
 					break;
 				case "3":
 					message = deleteService();
@@ -81,7 +80,7 @@ public class ServiceProg implements Runnable {
 				case "5":
 					message = modifFtpServeur();
 					break;
-				default: // == exit
+				default:
 					sout.println("finService");
 					return;
 				}
@@ -201,7 +200,6 @@ public class ServiceProg implements Runnable {
 
 	public String menuService(String m) {
 		String line = "";
-		// TODO afficher les services ajouter par le Client
 		String message = m + "Que voulez-vous faire : ";
 		message += "##1 == Ajouter/Recharger un service de votre serveur FTP ==";
 		message += "##2 == Ajouter/Recharger un JAR de votre serveur FTP ==";
@@ -213,7 +211,7 @@ public class ServiceProg implements Runnable {
 			do {
 				sout.println(message);
 				line = sin.readLine().trim().toLowerCase();
-				message = "Veuillez choisir [1], [2] ou [3] :";
+				message = "Veuillez choisir [1], [2], [3], [4] ou [5] :";
 			} while (!(CHOICES.contains(line) || line.equals(EXIT)));
 
 			return line;
@@ -244,10 +242,6 @@ public class ServiceProg implements Runnable {
 	}
 
 	public String chargerService(Boolean jar) throws ChargerServiceException {
-		// Charge une classe sur le server FTP du client
-		// Charge la classe a la racine du serveur FTP dans un package avec le nom du
-		// client
-
 		String line = "";
 		String message = "Donnez le nom de la Classe du service a charger :";
 		URLClassLoader urlcl = null;
@@ -258,17 +252,15 @@ public class ServiceProg implements Runnable {
 			if (line.equals(EXIT))
 				throw new ChargerServiceException("");
 
-			// Initialise un nouveau URLClassLoader pour charger ou update les classe du
-			// serveur FTP
 			String jarFile = jar ? programmeur.getLogin() + ".jar" : "";
 			urlcl = new URLClassLoader(new URL[] { new URL(programmeur.getFtpUrl() + jarFile) });
 			try {
-				// Ajoute la classe saisie pas l'utilisateur a la liste des services
 				ServiceRegistry.addService(urlcl.loadClass(programmeur.getLogin() + "." + line),
 						programmeur.getLogin());
 				urlcl.close();
 				return "Service ajoute avec succes####";
-			}catch (NoClassDefFoundError e) {
+			} catch (NoClassDefFoundError e) {
+				urlcl.close();
 				throw new ChargerServiceException(e.getMessage() + "####");
 			} catch (ClassNotFoundException e) {
 				urlcl.close();
@@ -288,17 +280,14 @@ public class ServiceProg implements Runnable {
 	// Ne fonctionne pas
 	public String chargerServiceJar() throws ChargerServiceException {
 		this.chargerService(true);
-		System.out.println("Service Charge");
 
 		try {
 			String path = this.programmeur.getFtpUrl() + this.programmeur.getLogin() + ".jar";
 			JarFile jarFile = new JarFile(new File(new URI(path)));
-			System.out.println("Jar file ouvert");
 			Enumeration<JarEntry> entries = jarFile.entries();
 
 			URL[] urls = { new URL("jar:" + path + "!/") };
 			URLClassLoader cl = new URLClassLoader(urls);
-			System.out.println("URL CL creer");
 
 			while (entries.hasMoreElements()) {
 				JarEntry je = entries.nextElement();
@@ -312,7 +301,6 @@ public class ServiceProg implements Runnable {
 				cl.loadClass(className);
 
 			}
-			System.out.println("Succes");
 			cl.close();
 			return "Success";
 		} catch (IOException | ClassNotFoundException | URISyntaxException e1) {
@@ -337,7 +325,7 @@ public class ServiceProg implements Runnable {
 		if (line.equals(EXIT))
 			return "";
 
-		return "Success##";
+		return "Service supprime !##";
 
 	}
 
@@ -357,7 +345,7 @@ public class ServiceProg implements Runnable {
 		if (line.equals(EXIT))
 			return "";
 
-		return "Success##";
+		return "Etat du service modifie##";
 
 	}
 }

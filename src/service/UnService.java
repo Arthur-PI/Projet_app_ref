@@ -8,6 +8,12 @@ public class UnService {
 	private boolean enable;
 	private String user;
 
+	public UnService(Class<? extends IService> service, String user) {
+		this.service = service;
+		this.user = user;
+		this.enable = true;
+	}
+
 	public boolean isEnable() {
 		return enable;
 	}
@@ -26,12 +32,6 @@ public class UnService {
 
 	public void toogleEnable() {
 		this.enable = !this.enable;
-	}
-
-	public UnService(Class<? extends IService> service, String user) {
-		this.service = service;
-		this.user = user;
-		this.enable = true;
 	}
 
 	public String toString() {
