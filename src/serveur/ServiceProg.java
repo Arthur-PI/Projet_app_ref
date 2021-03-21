@@ -23,8 +23,9 @@ public class ServiceProg implements Runnable {
 
 	static {
 		programmeurs = Collections.synchronizedMap(new HashMap<>());
-		programmeurs.put("arthur", new Programmeur("arthur", "a", "ftp://localhost:21/"));
-		programmeurs.put("raphael", new Programmeur("raphael", "r", "ftp://localhost:2121/"));
+		programmeurs.put("arthur", new Programmeur("arthur", "arthur123", "ftp://localhost:21/"));
+		programmeurs.put("raphael", new Programmeur("raphael", "raphael123", "ftp://localhost:2121/"));
+		programmeurs.put("jfbrette", new Programmeur("jfbrette", "brette123", "ftp://localhost:2121/"));
 	}
 
 	public ServiceProg(Socket s) {
